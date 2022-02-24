@@ -56,9 +56,11 @@ class CrimeListFragment : Fragment() {
         RecyclerView.ViewHolder(view), View.OnClickListener {
 
         private lateinit var crime: Crime
+        private lateinit var contactPoliceButton: Button
 
         private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
         private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
+
 
         init {
             itemView.setOnClickListener(this)
@@ -66,9 +68,16 @@ class CrimeListFragment : Fragment() {
 
         fun bind(crime: Crime) {
             this.crime = crime
+            if (crime.requiresPolice){
+                contactPoliceButton = itemView.findViewById(R.id.crime_requires_police)
+                contactPoliceButton.setOnClickListener {
+                    Toast.makeText(context, "Call 911", Toast.LENGTH_SHORT).show()
+                }
+            }
             titleTextView.text = this.crime.title
             dateTextView.text = this.crime.date.toString()
         }
+
 
         override fun onClick(v: View) {
             Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
@@ -82,7 +91,10 @@ class CrimeListFragment : Fragment() {
 
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
-            val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+            val view = when (viewType) {
+                0 -> layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+                else -> layoutInflater.inflate(R.layout.list_item_serious_crime, parent, false)
+            }
             return CrimeHolder(view)
         }
 
@@ -91,6 +103,14 @@ class CrimeListFragment : Fragment() {
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
             val crime = crimes[position]
             holder.bind(crime)
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            val crime = crimes[position]
+            return when {
+                crime.requiresPolice -> 1
+                else -> 0
+            }
         }
     }
 

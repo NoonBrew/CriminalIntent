@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         val currentFragment =
             supportFragmentManager.findFragmentById(R.id.fragment_container)
         // Checks to see if we had a fragment in our fragment container. If not we
-        // create an instance of the CrimeFragment()
+        // create an instance of the CrimeListFragment()
         if(currentFragment == null) {
             val fragment = CrimeListFragment.newInstance()
             supportFragmentManager.beginTransaction()
