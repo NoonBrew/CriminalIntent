@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,16 +21,12 @@ private const val TAG = "CrimeListFragment"
 class CrimeListFragment : Fragment() {
 
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = null
+    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(TAG, "Total Crimes: ${crimeListViewModel.crimes.size}")
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,14 +38,25 @@ class CrimeListFragment : Fragment() {
         crimeRecyclerView =
             view.findViewById(R.id.crime_recycler_view) as RecyclerView
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)
+        crimeRecyclerView.adapter = adapter
 
-        updateUI()
 
         return view
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        crimeListViewModel.crimeListLiveData.observe( // registers an observer on the liveData instance
+            viewLifecycleOwner,
+            Observer { crimes ->
+                crimes?.let {
+                    Log.i(TAG, "Got crimes ${crimes.size}")
+                    updateUI(crimes)
+                }
+            })
+    }
     // This is called when the fragment is inflated to grab the current listViewModel information
-    private fun updateUI() {
-        val crimes = crimeListViewModel.crimes
+    private fun updateUI(crimes: List<Crime>) {
         // crimes are stored and passed to the adapter as a mutable list
         adapter = CrimeAdapter(crimes)
         // the adapter is then passed to the crimeRecyclerView.
@@ -79,12 +87,12 @@ class CrimeListFragment : Fragment() {
             this.crime = crime
             // If the crime has a true value for requiresPolice we wire up the contactPoliceButton
             // and add it to the view.
-            if (crime.requiresPolice){
-                contactPoliceButton = itemView.findViewById(R.id.crime_requires_police)
-                contactPoliceButton.setOnClickListener { // Set a listener to make a toast if its pressed
-                    Toast.makeText(context, "Call 911", Toast.LENGTH_SHORT).show()
-                }
-            }
+//            if (crime.requiresPolice){
+//                contactPoliceButton = itemView.findViewById(R.id.crime_requires_police)
+//                contactPoliceButton.setOnClickListener { // Set a listener to make a toast if its pressed
+//                    Toast.makeText(context, "Call 911", Toast.LENGTH_SHORT).show()
+//                }
+//            } // TODO Re-add when not using pre-populated data.
             // Passes the data to our textViews
             titleTextView.text = this.crime.title
             dateTextView.text = this.crime.formattedDate()
@@ -134,7 +142,7 @@ class CrimeListFragment : Fragment() {
             // If the requiresPolice attribute is true it returns 1 otherwise 0 this is passed on as
             // the view type.
             return when {
-                crime.requiresPolice -> 1
+               // crime.requiresPolice -> 1 // TODO re-add when not using pre-populated database.
                 else -> 0
             }
         }
