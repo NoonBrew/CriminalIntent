@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.bignerdranch.android.criminalintent.database.CrimeDatabase
 import java.util.*
+import java.util.concurrent.Executors
 
 private const val DATABASE_NAME = "crime-database"
 
@@ -21,11 +22,24 @@ class CrimeRepository private constructor(context: Context){
     ).build()
 
     private val crimeDao = database.CrimeDao() // calls the Database access Object class.
+    private val executor = Executors.newSingleThreadExecutor() // Execurtors allow us to run code on selected thread.
 
     // Calls the functions from the CrimeDao
     fun getCrimes(): LiveData<List<Crime>> = crimeDao.getCrimes()
 
     fun getCrime(id: UUID): LiveData<Crime?> = crimeDao.getCrime(id)
+
+    fun updateCrime(crime: Crime) {
+        executor.execute {
+            crimeDao.updateCrime(crime)
+        }
+    }
+
+    fun addCrime(crime: Crime) {
+        executor.execute {
+            crimeDao.addCrime(crime)
+        }
+    }
 
     companion object{
         private var INSTANCE: CrimeRepository? = null

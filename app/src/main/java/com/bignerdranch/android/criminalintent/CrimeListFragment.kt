@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,16 +16,31 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
+
+    /**
+     * Required interface for hosting activities
+     */
+    interface Callbacks {
+        fun onCrimeSelected(crimeId: UUID)
+    }
+    // callbacks allow our fragment to call functions on the hosting activity
+    private var callbacks: Callbacks? = null
 
     private lateinit var crimeRecyclerView: RecyclerView
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
+    }
+    // Called when a fragment is attached to an activity. Context is the activity hosting.
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
     }
 
 
@@ -55,6 +71,13 @@ class CrimeListFragment : Fragment() {
                 }
             })
     }
+    // On detach from the activity we set callback to null since we can't be sure
+    // the activity still exists
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
+    }
+
     // This is called when the fragment is inflated to grab the current listViewModel information
     private fun updateUI(crimes: List<Crime>) {
         // crimes are stored and passed to the adapter as a mutable list
@@ -107,7 +130,9 @@ class CrimeListFragment : Fragment() {
 
 
         override fun onClick(v: View) { // Passes a toast message if a view is clicked.
-            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
+            // stores a UUID of our crime selected in our callbacks holder.
+            callbacks?.onCrimeSelected(crime.id)
         }
 
     }
