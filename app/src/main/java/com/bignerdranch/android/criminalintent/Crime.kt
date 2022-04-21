@@ -15,6 +15,9 @@ data class Crime(@PrimaryKey val id: UUID = UUID.randomUUID(),
                  //var requiresPolice: Boolean = false // TODO re-add later
 ) { // @PrimaryKey sets the PrimaryKey column
 
+    val photoFileName
+        get() = "IMG_$id.jpg"
+
     fun formattedDate(): String { // Function creates a formatted String value for our date.
         return SimpleDateFormat("EEEE, MMM d, yyyy", Locale.getDefault()).format(date)
     }

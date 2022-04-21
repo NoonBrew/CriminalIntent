@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.bignerdranch.android.criminalintent.database.CrimeDatabase
 import com.bignerdranch.android.criminalintent.database.migration_1_2
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -25,6 +26,7 @@ class CrimeRepository private constructor(context: Context){
 
     private val crimeDao = database.CrimeDao() // calls the Database access Object class.
     private val executor = Executors.newSingleThreadExecutor() // Execurtors allow us to run code on selected thread.
+    private val filesDir = context.applicationContext.filesDir // Will store the path of the photo file on the storage.
 
     // Calls the functions from the CrimeDao
     fun getCrimes(): LiveData<List<Crime>> = crimeDao.getCrimes()
@@ -42,6 +44,8 @@ class CrimeRepository private constructor(context: Context){
             crimeDao.addCrime(crime)
         }
     }
+
+    fun getPhotoFile(crime: Crime): File = File(filesDir, crime.photoFileName) // returns a File path and file name.
 
     companion object{
         private var INSTANCE: CrimeRepository? = null
